@@ -46,8 +46,6 @@ pub enum TokenText<'a> {
     Empty,
 }
 
-
-
 impl<'a> From<TokenText<'a>> for String {
     fn from(val: TokenText<'a>) -> Self {
         match val {
