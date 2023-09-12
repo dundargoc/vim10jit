@@ -1,3 +1,12 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::enum_glob_use)]
+#![allow(clippy::items_after_statements)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::trivially_copy_pass_by_ref)]
+#![allow(clippy::unnecessary_wraps)]
 #![allow(unreachable_code)]
 
 use std::{
@@ -50,7 +59,7 @@ impl<'a> From<TokenText<'a>> for String {
         match val {
             TokenText::Slice(s) => s.iter().collect(),
             TokenText::Owned(s) => s,
-            TokenText::Empty => "".to_string(),
+            TokenText::Empty => String::new(),
         }
     }
 }
@@ -60,7 +69,7 @@ impl<'a> From<&TokenText<'a>> for String {
         match val {
             TokenText::Slice(s) => s.iter().collect(),
             TokenText::Owned(s) => s.clone(),
-            TokenText::Empty => "".to_string(),
+            TokenText::Empty => String::new(),
         }
     }
 }
@@ -69,7 +78,7 @@ impl<'a> Debug for TokenText<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TokenText::Slice(s) => {
-                write!(f, "{:?}", s.iter().cloned().collect::<String>())
+                write!(f, "{:?}", s.iter().copied().collect::<String>())
             }
             TokenText::Owned(o) => write!(f, "{o:?}"),
             TokenText::Empty => write!(f, "<Empty>"),
@@ -85,7 +94,7 @@ impl<'a> Display for TokenText<'a> {
             match self {
                 TokenText::Slice(s) => s.iter().collect::<String>(),
                 TokenText::Owned(s) => s.clone(),
-                TokenText::Empty => "".to_string(),
+                TokenText::Empty => String::new(),
             }
         )
     }
@@ -668,7 +677,7 @@ impl Lexer {
         } else {
             Ok(Token {
                 kind: TokenKind::EndOfFile,
-                text: TokenText::Owned("".to_string()),
+                text: TokenText::Owned(String::new()),
                 span: Span::empty(),
             })
         }
@@ -761,20 +770,19 @@ impl Lexer {
                             return self.read_identifier();
                         } else if ch.is_ascii_digit() {
                             return self.read_number();
-                        } else {
-                            Ok(Token {
-                                kind: Illegal,
-                                // text: TokenText::Ch(ch),
-                                text: todo!(),
-                                span: self.make_span(self.position(), self.position())?,
-                            })
                         }
+                        Ok(Token {
+                            kind: Illegal,
+                            // text: TokenText::Ch(ch),
+                            text: todo!(),
+                            span: self.make_span(self.position(), self.position())?,
+                        })
                     }
                 }
             }
             None => Ok(Token {
                 kind: EndOfFile,
-                text: TokenText::Owned("".to_string()),
+                text: TokenText::Owned(String::new()),
                 span: Span::empty(),
             }),
         }?;
@@ -1045,9 +1053,7 @@ pub fn snapshot_lexing(input: &str) -> String {
             break;
         }
 
-        if tok.kind == TokenKind::Illegal {
-            panic!("failure: {input:#?}");
-        }
+        assert!(!(tok.kind == TokenKind::Illegal), "failure: {input:#?}");
 
         tokens.push_back(tok);
     }
@@ -1058,9 +1064,10 @@ pub fn snapshot_lexing(input: &str) -> String {
         output += "\n";
 
         while let Some(tok) = tokens.pop_front() {
-            if tok.span.start_row != tok.span.end_row {
-                panic!("We haven't handled this yet");
-            }
+            assert!(
+                tok.span.start_row == tok.span.end_row,
+                "We haven't handled this yet"
+            );
 
             if tok.span.start_row != row {
                 tokens.push_front(tok);
@@ -1070,7 +1077,7 @@ pub fn snapshot_lexing(input: &str) -> String {
             output += &" ".repeat(tok.span.start_col);
             output += &"^".repeat(tok.span.end_col - tok.span.start_col);
             output += &format!(" {tok:?}");
-            output += "\n"
+            output += "\n";
         }
     }
 
