@@ -1,3 +1,20 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::enum_glob_use)]
+#![allow(clippy::explicit_iter_loop)]
+#![allow(clippy::from_iter_instead_of_collect)]
+#![allow(clippy::manual_let_else)]
+#![allow(clippy::manual_string_new)]
+#![allow(clippy::match_bool)]
+#![allow(clippy::match_same_arms)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::semicolon_if_nothing_returned)]
+#![allow(clippy::single_match_else)]
+#![allow(clippy::used_underscore_binding)]
+#![allow(clippy::wildcard_imports)]
+
 use std::{collections::HashMap, fmt::Write as _, path::Path};
 
 use lexer::Lexer;

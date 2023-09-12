@@ -1,3 +1,9 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::enum_glob_use)]
+#![allow(clippy::items_after_statements)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::must_use_candidate)]
 #![allow(unreachable_code)]
 
 use std::{
@@ -50,7 +56,7 @@ impl<'a> From<TokenText<'a>> for String {
         match val {
             TokenText::Slice(s) => s.iter().collect(),
             TokenText::Owned(s) => s,
-            TokenText::Empty => "".to_string(),
+            TokenText::Empty => String::new(),
         }
     }
 }
@@ -60,7 +66,7 @@ impl<'a> From<&TokenText<'a>> for String {
         match val {
             TokenText::Slice(s) => s.iter().collect(),
             TokenText::Owned(s) => s.clone(),
-            TokenText::Empty => "".to_string(),
+            TokenText::Empty => String::new(),
         }
     }
 }
@@ -69,7 +75,7 @@ impl<'a> Debug for TokenText<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TokenText::Slice(s) => {
-                write!(f, "{:?}", s.iter().cloned().collect::<String>())
+                write!(f, "{:?}", s.iter().copied().collect::<String>())
             }
             TokenText::Owned(o) => write!(f, "{o:?}"),
             TokenText::Empty => write!(f, "<Empty>"),
@@ -85,7 +91,7 @@ impl<'a> Display for TokenText<'a> {
             match self {
                 TokenText::Slice(s) => s.iter().collect::<String>(),
                 TokenText::Owned(s) => s.clone(),
-                TokenText::Empty => "".to_string(),
+                TokenText::Empty => String::new(),
             }
         )
     }
@@ -405,7 +411,7 @@ impl Lexer {
         }
     }
 
-    fn read_while<F>(&self, cond: F) -> Result<(usize, usize)>
+    fn read_while<F>(&self, cond: F) -> (usize, usize)
     where
         F: Fn(char) -> bool,
     {
@@ -418,7 +424,7 @@ impl Lexer {
             self.read_char();
         }
 
-        Ok((position, self.state.borrow().position))
+        (position, self.state.borrow().position)
     }
 
     fn position(&self) -> usize {
@@ -426,7 +432,7 @@ impl Lexer {
     }
 
     fn read_number(&self) -> Result<Token> {
-        let (pos, _) = self.read_while(|ch| ch.is_numeric() || ch == '\'')?;
+        let (pos, _) = self.read_while(|ch| ch.is_numeric() || ch == '\'');
 
         if self.ch() == Some(&'.') {
             // consume the .
@@ -532,7 +538,7 @@ impl Lexer {
 
     fn read_until<F>(&self, until: char, kind: TokenKind, fail: F) -> Result<Option<Token>>
     where
-        F: Fn(&char) -> bool,
+        F: Fn(char) -> bool,
     {
         self.read_char();
         if self.ch().is_some_and(|&ch| ch == until) {
@@ -546,7 +552,7 @@ impl Lexer {
         let position = self.position();
 
         while let Some(ch) = self.ch().filter(|&&ch| ch != until) {
-            if fail(ch) {
+            if fail(*ch) {
                 return Ok(None);
             }
 
@@ -561,7 +567,7 @@ impl Lexer {
     }
 
     fn read_comment(&self) -> Result<Token> {
-        let (pos, _) = self.read_while(|ch| ch != '\n')?;
+        let (pos, _) = self.read_while(|ch| ch != '\n');
 
         Ok(Token {
             kind: TokenKind::Comment,
@@ -668,7 +674,7 @@ impl Lexer {
         } else {
             Ok(Token {
                 kind: TokenKind::EndOfFile,
-                text: TokenText::Owned("".to_string()),
+                text: TokenText::Owned(String::new()),
                 span: Span::empty(),
             })
         }
@@ -761,20 +767,19 @@ impl Lexer {
                             return self.read_identifier();
                         } else if ch.is_ascii_digit() {
                             return self.read_number();
-                        } else {
-                            Ok(Token {
-                                kind: Illegal,
-                                // text: TokenText::Ch(ch),
-                                text: todo!(),
-                                span: self.make_span(self.position(), self.position())?,
-                            })
                         }
+                        Ok(Token {
+                            kind: Illegal,
+                            // text: TokenText::Ch(ch),
+                            text: todo!(),
+                            span: self.make_span(self.position(), self.position())?,
+                        })
                     }
                 }
             }
             None => Ok(Token {
                 kind: EndOfFile,
-                text: TokenText::Owned("".to_string()),
+                text: TokenText::Owned(String::new()),
                 span: Span::empty(),
             }),
         }?;
@@ -898,12 +903,12 @@ impl Lexer {
         Ok(match self.peek_char().unwrap() {
             '\'' => {
                 self.read_char();
-                self.read_until('\'', TokenKind::InterpolatedLiteralString, |ch| *ch == '\n')?
+                self.read_until('\'', TokenKind::InterpolatedLiteralString, |ch| ch == '\n')?
                     .unwrap()
             }
             '"' => {
                 self.read_char();
-                self.read_until('\"', TokenKind::InterpolatedString, |ch| *ch == '\n')?
+                self.read_until('\"', TokenKind::InterpolatedString, |ch| ch == '\n')?
                     .unwrap()
             }
             c if is_identifier(*c) => {
@@ -1001,7 +1006,7 @@ impl Lexer {
     }
 }
 
-/// NormalModeParser is used to parse normal mode commands.
+/// `NormalModeParser` is used to parse normal mode commands.
 ///
 /// It will just read the rest of the line after normal mode,
 /// consume all the text as one literal, and then continue on afterwards
@@ -1028,8 +1033,8 @@ impl SubLexer for NormalModeParser {
     }
 }
 
-fn is_newline(ch: &char) -> bool {
-    *ch == '\n' || *ch == '\0'
+fn is_newline(ch: char) -> bool {
+    ch == '\n' || ch == '\0'
 }
 
 fn is_identifier(ch: char) -> bool {
@@ -1045,9 +1050,7 @@ pub fn snapshot_lexing(input: &str) -> String {
             break;
         }
 
-        if tok.kind == TokenKind::Illegal {
-            panic!("failure: {input:#?}");
-        }
+        assert!(!(tok.kind == TokenKind::Illegal), "failure: {input:#?}");
 
         tokens.push_back(tok);
     }
@@ -1058,9 +1061,10 @@ pub fn snapshot_lexing(input: &str) -> String {
         output += "\n";
 
         while let Some(tok) = tokens.pop_front() {
-            if tok.span.start_row != tok.span.end_row {
-                panic!("We haven't handled this yet");
-            }
+            assert!(
+                tok.span.start_row == tok.span.end_row,
+                "We haven't handled this yet"
+            );
 
             if tok.span.start_row != row {
                 tokens.push_front(tok);
@@ -1070,7 +1074,7 @@ pub fn snapshot_lexing(input: &str) -> String {
             output += &" ".repeat(tok.span.start_col);
             output += &"^".repeat(tok.span.end_col - tok.span.start_col);
             output += &format!(" {tok:?}");
-            output += "\n"
+            output += "\n";
         }
     }
 

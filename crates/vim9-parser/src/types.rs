@@ -59,9 +59,10 @@ impl Type {
     fn parse_inner(parser: &Parser, consume: bool, opts: &TypeOpts) -> Result<Type> {
         match parser.front_kind() {
             TokenKind::Identifier => {
-                let literal: Literal = match consume {
-                    true => parser.pop(),
-                    false => parser.front_owned(),
+                let literal: Literal = if consume {
+                    parser.pop()
+                } else {
+                    parser.front_owned()
                 }
                 .try_into()?;
 
@@ -106,12 +107,12 @@ impl Type {
     }
 
     pub fn parse_in_expression(parser: &Parser, opts: &TypeOpts) -> Result<Type> {
-        parser.expect_token(TokenKind::SpacedColon)?;
+        parser.expect_token(&TokenKind::SpacedColon)?;
         Self::parse_inner(parser, false, opts)
     }
 
     pub fn parse(parser: &Parser, opts: &TypeOpts) -> Result<Type> {
-        parser.expect_token(TokenKind::SpacedColon)?;
+        parser.expect_token(&TokenKind::SpacedColon)?;
         Self::parse_inner(parser, true, opts)
     }
 }

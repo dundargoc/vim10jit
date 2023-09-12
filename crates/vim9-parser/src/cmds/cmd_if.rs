@@ -41,7 +41,7 @@ impl IfCommand {
 
         Ok(ExCommand::If(IfCommand {
             if_tok: parser.expect_identifier_with_text("if")?.into(),
-            condition: Expression::parse(parser, Precedence::Lowest)?,
+            condition: Expression::parse(parser, &Precedence::Lowest)?,
             if_eol: parser.expect_eol()?,
             body: Body::parse_until_any(parser, &if_endings)?,
             elseifs: {
@@ -49,10 +49,10 @@ impl IfCommand {
                 while parser.front_ref().text.equals("elseif") {
                     elseifs.push(ElseIfCommand {
                         elseif_tok: parser.pop().into(),
-                        condition: Expression::parse(parser, Precedence::Lowest)?,
+                        condition: Expression::parse(parser, &Precedence::Lowest)?,
                         elseif_eol: parser.expect_eol()?,
                         body: Body::parse_until_any(parser, &if_endings)?,
-                    })
+                    });
                 }
 
                 elseifs
