@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::path::Path;
 
 use anyhow::{bail, ensure, Context, Result};
