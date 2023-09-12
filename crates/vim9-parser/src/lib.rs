@@ -1,5 +1,16 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::doc_markdown)]
+#![allow(clippy::enum_glob_use)]
+#![allow(clippy::items_after_statements)]
+#![allow(clippy::match_same_arms)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::needless_pass_by_value)]
+#![allow(clippy::struct_excessive_bools)]
+#![allow(clippy::unnecessary_wraps)]
+#![allow(clippy::wildcard_imports)]
 #![allow(unused_variables)]
-#![allow(dead_code)]
 
 use std::{
     cell::{Ref, RefCell},
@@ -417,9 +428,10 @@ impl SharedCommand {
         while !parser.front_kind().is_whitespace() {
             let tok = parser.pop();
 
-            if prev_end > tok.span.start_col {
-                panic!("failed to make shared command: {parser:#?}");
-            }
+            assert!(
+                prev_end <= tok.span.start_col,
+                "failed to make shared command: {parser:#?}"
+            );
 
             contents += " ".repeat(tok.span.start_col - prev_end).as_str();
             contents += tok.text.as_str();
@@ -804,10 +816,9 @@ impl Identifier {
             Identifier::Raw(_) => true,
             Identifier::Scope(_) => false,
             Identifier::Ellipsis => false,
-            Identifier::Unpacked(unpacked) => unpacked
-                .identifiers
-                .iter()
-                .all(|ident| ident.is_valid_local()),
+            Identifier::Unpacked(unpacked) => {
+                unpacked.identifiers.iter().all(Identifier::is_valid_local)
+            }
         }
     }
 
@@ -1484,9 +1495,10 @@ impl VarCommand {
                         parser.next_token();
                     }
 
-                    if parser.front_kind() == TokenKind::EndOfFile {
-                        panic!("Failed to do the stuffs... {contents:?}");
-                    }
+                    assert!(
+                        !(parser.front_kind() == TokenKind::EndOfFile),
+                        "Failed to do the stuffs... {contents:?}"
+                    );
 
                     parser.next_token();
                     if line.len() == 1 && line[0].text == open.text {
@@ -1571,7 +1583,7 @@ impl CallCommand {
             call: parser
                 .expect_identifier_with_text("call")
                 .ok()
-                .map(|t| t.into()),
+                .map(std::convert::Into::into),
             expr: Expression::parse(parser, Precedence::Call)?,
             open: parser.ensure_token(TokenKind::LeftParen)?,
             args: parser.parse_expression_list(TokenKind::RightParen)?,
@@ -2007,7 +2019,7 @@ impl<'a> Parser<'a> {
                 return true;
             }
 
-            peek_index += 1
+            peek_index += 1;
         }
     }
 
@@ -2021,7 +2033,7 @@ impl<'a> Parser<'a> {
                 return true;
             }
 
-            peek_index += 1
+            peek_index += 1;
         }
     }
 
@@ -2038,7 +2050,7 @@ impl<'a> Parser<'a> {
                 return true;
             }
 
-            peek_index += 1
+            peek_index += 1;
         }
     }
 
@@ -2174,9 +2186,8 @@ impl<'a> Parser<'a> {
             TokenKind::Colon => {
                 if skipped {
                     return None;
-                } else {
-                    infix_expr::parse_colon
                 }
+                infix_expr::parse_colon
             }
             // Logical comparisons
             TokenKind::Or | TokenKind::And => infix_expr::parse_infix_operator,
@@ -2227,9 +2238,8 @@ impl<'a> Parser<'a> {
                 break;
             }
 
-            let infix = match self.get_infix_fn() {
-                Some(infix) => infix,
-                None => return Ok(left),
+            let Some(infix) = self.get_infix_fn() else {
+                return Ok(left);
             };
 
             self.next_token();
@@ -2407,7 +2417,7 @@ impl<'a> Parser<'a> {
                 },
             };
 
-            tokens.push_back(tok)
+            tokens.push_back(tok);
         }
     }
 
@@ -2622,13 +2632,11 @@ impl<'a> Parser<'a> {
                 break;
             }
 
-            if self.front_kind().is_eof() {
-                panic!("EOF");
-            }
+            assert!(!self.front_kind().is_eof(), "EOF");
         }
 
         if self.peek_kind() != close {
-            self.skip_peeked_whitespace()
+            self.skip_peeked_whitespace();
         }
 
         self.expect_peek(close)?;
@@ -2728,14 +2736,6 @@ fn is_multiline_kind(kind: &TokenKind) -> bool {
     matches!(kind, TokenKind::MethodArrow)
 }
 
-fn snapshot_parsing(input: &str) -> String {
-    let lexer = Lexer::new(input);
-    let parser = Parser::new(&lexer);
-    let program = parser.parse_program();
-
-    format!("{:#?}", program.commands)
-}
-
 pub fn new_parser(lexer: &Lexer) -> Parser {
     Parser::new(lexer)
 }
@@ -2754,6 +2754,15 @@ pub fn setup_trace() {
 
 #[cfg(test)]
 mod test {
+
+    fn snapshot_parsing(input: &str) -> String {
+        let lexer = Lexer::new(input);
+        let parser = Parser::new(&lexer);
+        let program = parser.parse_program();
+
+        format!("{:#?}", program.commands)
+    }
+
     use crate::*;
 
     macro_rules! snap {

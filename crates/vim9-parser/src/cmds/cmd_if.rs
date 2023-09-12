@@ -52,7 +52,7 @@ impl IfCommand {
                         condition: Expression::parse(parser, Precedence::Lowest)?,
                         elseif_eol: parser.expect_eol()?,
                         body: Body::parse_until_any(parser, &if_endings)?,
-                    })
+                    });
                 }
 
                 elseifs
