@@ -46,10 +46,12 @@ luac.out
 
 doc/tags
 
-
 # Added by cargo
 
 target/
 .fleet/
 
 dump.lsif
+
+# Test files
+/out
