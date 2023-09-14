@@ -79,173 +79,68 @@ mod integration {
         });
     }
 
-    #[test]
-    fn autoload_ccomplete() {
-        test("autoload/ccomplete.vim");
+    macro_rules! test {
+        ($name:tt, $file:tt) => {
+            #[test]
+            fn $name() {
+                test($file);
+            }
+        };
     }
 
-    #[test]
-    #[should_panic]
-    fn autoload_context() {
-        test("autoload/context.vim");
+    macro_rules! testpanic {
+        ($name:tt, $file:tt) => {
+            #[test]
+            #[should_panic]
+            fn $name() {
+                test($file);
+            }
+        };
     }
 
-    #[test]
-    #[should_panic]
-    fn autoload_dist_ft() {
-        test("autoload/dist/ft.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn autoload_dist_script() {
-        test("autoload/dist/script.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn autoload_dist_vimindent() {
-        test("autoload/dist/vimindent.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn autoload_typeset() {
-        test("autoload/typeset.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn colors_tools_check_colors() {
-        test("colors/tools/check_colors.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn compiler_context() {
-        test("compiler/context.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn ftplugin() {
-        test("ftplugin.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn ftplugin_context() {
-        test("ftplugin/context.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn ftplugin_gdscript() {
-        test("ftplugin/gdscript.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn ftplugin_gdshader() {
-        test("ftplugin/gdshader.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn ftplugin_mf() {
-        test("ftplugin/mf.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn ftplugin_mp() {
-        test("ftplugin/mp.vim");
-    }
-
-    #[test]
-    fn ftplugof() {
-        test("ftplugof.vim");
-    }
-
-    #[test]
-    fn import_dist_vimhelp() {
-        test("import/dist/vimhelp.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn import_dist_vimhighlight() {
-        test("import/dist/vimhighlight.vim");
-    }
-
-    #[test]
-    fn indent_context() {
-        test("indent/context.vim");
-    }
-
-    #[test]
-    fn indent_gdscript() {
-        test("indent/gdscript.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn indent_mp() {
-        test("indent/mp.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn indent_vim() {
-        test("indent/vim.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn makemenu() {
-        test("makemenu.vim");
-    }
-
-    #[test]
-    fn pack_dist_opt_cfilter_plugin_cfilter() {
-        test("pack/dist/opt/cfilter/plugin/cfilter.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn syntax_context() {
-        test("syntax/context.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn syntax_mf() {
-        test("syntax/mf.vim");
-    }
-
-    #[test]
-    #[should_panic]
-    fn syntax_mp() {
-        test("syntax/mp.vim");
-    }
-
-    #[test]
-    fn syntax_shared_context_data_context() {
-        test("syntax/shared/context-data-context.vim");
-    }
-
-    #[test]
-    fn syntax_shared_context_data_interfaces() {
-        test("syntax/shared/context-data-interfaces.vim");
-    }
-
-    #[test]
-    fn syntax_shared_context_data_metafun() {
-        test("syntax/shared/context-data-metafun.vim");
-    }
-
-    #[test]
-    fn syntax_shared_context_data_tex() {
-        test("syntax/shared/context-data-tex.vim");
-    }
+    test!(autoload_ccomplete, "autoload/ccomplete.vim");
+    testpanic!(autoload_context, "autoload/context.vim");
+    testpanic!(autoload_dist_ft, "autoload/dist/ft.vim");
+    testpanic!(autoload_dist_script, "autoload/dist/script.vim");
+    testpanic!(autoload_dist_vimindent, "autoload/dist/vimindent.vim");
+    testpanic!(autoload_typeset, "autoload/typeset.vim");
+    testpanic!(colors_tools_check_colors, "colors/tools/check_colors.vim");
+    testpanic!(compiler_context, "compiler/context.vim");
+    testpanic!(ftplugin, "ftplugin.vim");
+    testpanic!(ftplugin_context, "ftplugin/context.vim");
+    testpanic!(ftplugin_gdscript, "ftplugin/gdscript.vim");
+    testpanic!(ftplugin_gdshader, "ftplugin/gdshader.vim");
+    testpanic!(ftplugin_mf, "ftplugin/mf.vim");
+    testpanic!(ftplugin_mp, "ftplugin/mp.vim");
+    test!(ftplugof, "ftplugof.vim");
+    test!(import_dist_vimhelp, "import/dist/vimhelp.vim");
+    testpanic!(import_dist_vimhighlight, "import/dist/vimhighlight.vim");
+    test!(indent_context, "indent/context.vim");
+    test!(indent_gdscript, "indent/gdscript.vim");
+    testpanic!(indent_mp, "indent/mp.vim");
+    testpanic!(indent_vim, "indent/vim.vim");
+    testpanic!(makemenu, "makemenu.vim");
+    test!(
+        pack_dist_opt_cfilter_plugin_cfilter,
+        "pack/dist/opt/cfilter/plugin/cfilter.vim"
+    );
+    testpanic!(syntax_context, "syntax/context.vim");
+    testpanic!(syntax_mf, "syntax/mf.vim");
+    testpanic!(syntax_mp, "syntax/mp.vim");
+    test!(
+        syntax_shared_context_data_context,
+        "syntax/shared/context-data-context.vim"
+    );
+    test!(
+        syntax_shared_context_data_interfaces,
+        "syntax/shared/context-data-interfaces.vim"
+    );
+    test!(
+        syntax_shared_context_data_metafun,
+        "syntax/shared/context-data-metafun.vim"
+    );
+    test!(
+        syntax_shared_context_data_tex,
+        "syntax/shared/context-data-tex.vim"
+    );
 }
