@@ -26,7 +26,7 @@ pub struct UserCommand {
 impl UserCommand {
     pub fn parse(parser: &Parser) -> Result<ExCommand> {
         let tok = parser.expect_identifier_with_text("command")?.into();
-        let bang = parser.consume_if_kind(TokenKind::Bang).is_some();
+        let bang = parser.consume_if_kind(&TokenKind::Bang).is_some();
 
         let mut command_bang = false;
         let mut command_bar = false;
@@ -35,7 +35,7 @@ impl UserCommand {
         let mut command_range = None;
         while parser.front_kind() == TokenKind::Minus {
             parser.next_token();
-            parser.ensure_token(TokenKind::Identifier)?;
+            parser.ensure_token(&TokenKind::Identifier)?;
 
             match parser.pop().text.as_str() {
                 "bar" => {
@@ -45,11 +45,11 @@ impl UserCommand {
                     command_bang = true;
                 }
                 "nargs" => {
-                    parser.expect_token(TokenKind::Equal)?;
+                    parser.expect_token(&TokenKind::Equal)?;
                     command_nargs = Some(parser.pop().text.to_string());
                 }
                 "complete" => {
-                    parser.expect_token(TokenKind::Equal)?;
+                    parser.expect_token(&TokenKind::Equal)?;
                     let mut complete = parser.pop().text.to_string();
                     if parser.front_kind() == TokenKind::Comma {
                         complete += &parser.pop().text.to_string();
@@ -59,7 +59,7 @@ impl UserCommand {
                     command_complete = Some(complete);
                 }
                 "range" => {
-                    parser.expect_token(TokenKind::Equal)?;
+                    parser.expect_token(&TokenKind::Equal)?;
                     command_range = Some(parser.pop().text.to_string());
                 }
                 _ => panic!("OH NO"),
@@ -73,7 +73,7 @@ impl UserCommand {
             command_bar,
             command_nargs,
             command_complete,
-            name: parser.expect_token(TokenKind::Identifier)?.text,
+            name: parser.expect_token(&TokenKind::Identifier)?.text,
             command: parser.parse_command()?.into(),
             command_keepscript: false,
             command_register: None,

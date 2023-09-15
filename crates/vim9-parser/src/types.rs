@@ -107,12 +107,12 @@ impl Type {
     }
 
     pub fn parse_in_expression(parser: &Parser, opts: &TypeOpts) -> Result<Type> {
-        parser.expect_token(TokenKind::SpacedColon)?;
+        parser.expect_token(&TokenKind::SpacedColon)?;
         Self::parse_inner(parser, false, opts)
     }
 
     pub fn parse(parser: &Parser, opts: &TypeOpts) -> Result<Type> {
-        parser.expect_token(TokenKind::SpacedColon)?;
+        parser.expect_token(&TokenKind::SpacedColon)?;
         Self::parse_inner(parser, true, opts)
     }
 }

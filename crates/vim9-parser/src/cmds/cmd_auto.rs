@@ -18,7 +18,7 @@ impl AugroupCommand {
     pub fn parse(parser: &Parser) -> Result<ExCommand> {
         Ok(ExCommand::Augroup(AugroupCommand {
             augroup: parser.expect_identifier_with_text("augroup")?.into(),
-            augroup_name: parser.expect_token(TokenKind::Identifier)?.try_into()?,
+            augroup_name: parser.expect_token(&TokenKind::Identifier)?.try_into()?,
             augroup_eol: parser.expect_eol()?,
             // TODO: This should be until augroup END, unless you can't have nested ones legally
             body: Body::parse_until(parser, "augroup")?,

@@ -20,7 +20,7 @@ impl DeferCommand {
             defer_: parser.expect_identifier_with_text("defer")?.into(),
             call: {
                 // Parse up to the point it would be a call expr
-                let base = Expression::parse(parser, Precedence::Call)
+                let base = Expression::parse(parser, &Precedence::Call)
                     .expect("base")
                     .into();
 
@@ -29,7 +29,7 @@ impl DeferCommand {
 
                 // Closing on right paren, DO NOT advance
                 parser
-                    .expect_token(TokenKind::RightParen)
+                    .expect_token(&TokenKind::RightParen)
                     .expect("rightparen");
 
                 right
